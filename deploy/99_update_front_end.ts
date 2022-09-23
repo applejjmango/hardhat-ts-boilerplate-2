@@ -2,38 +2,47 @@ import fs from "fs"
 import { ethers, network } from "hardhat"
 import { DeployFunction } from "hardhat-deploy/types"
 
-import { frontEndAbiLocation, frontEndContractsFile } from "../helper-hardhat-config"
+import { frontEndAbiLocation, frontEndContractsLocation } from "../helper-hardhat-config"
 
 const deployFunction: DeployFunction = async ({}) => {
   if (process.env.UPDATE_FRONT_END) {
-    console.log("updating front end...")
+    console.log("Getting updated contract address and ABI...")
     await updateContractAddresses()
     await updateAbi()
-    console.log("Front End Written!!!")
+    console.log("Finished fetching new contract address and ABI!!!")
   }
 }
 
 export default deployFunction
 
+let contractName = "NFTMarket"
+
 async function updateAbi() {
-  const NFTMarketPlace = await ethers.getContract("NFTMarket")
+  const NFTMarketPlace = await ethers.getContract(`${contractName}`)
 
   fs.writeFileSync(
-    `${frontEndAbiLocation}NFTMarket.json`,
+    `${frontEndAbiLocation} ${contractName}Abi.json`,
     NFTMarketPlace.interface.format(ethers.utils.FormatTypes.json)
   )
 }
 
 async function updateContractAddresses() {
+  let contractAddresses
   const NFTMarketPlace = await ethers.getContract("NFTMarket")
-  console.log("NFTMarket address: ", NFTMarketPlace.address)
+  console.log(`${contractName} address: `, NFTMarketPlace.address)
 
   const chainId: number | undefined = network.config.chainId
   console.log("chainId ", chainId)
   if (!chainId) return
 
-  const contractAddresses = JSON.parse(fs.readFileSync(frontEndContractsFile, "utf8"))
-  console.log("contractAddresses ", contractAddresses)
+  // create json file if not exist
+  if (!fs.existsSync(`${frontEndContractsLocation}${contractName}.json`)) {
+    fs.writeFileSync(`${frontEndContractsLocation}${contractName}.json`, JSON.stringify({}))
+  }
+
+  contractAddresses = JSON.parse(
+    fs.readFileSync(`${frontEndContractsLocation}${contractName}.json`, "utf8")
+  )
 
   if (chainId in contractAddresses) {
     if (!contractAddresses[chainId]["NFTMarketPlace"].includes(NFTMarketPlace.address)) {
@@ -42,7 +51,10 @@ async function updateContractAddresses() {
   } else {
     contractAddresses[chainId] = { NFTMarketPlace: [NFTMarketPlace.address] }
   }
-  fs.writeFileSync(frontEndContractsFile, JSON.stringify(contractAddresses))
+  fs.writeFileSync(
+    `${frontEndContractsLocation} ${contractName}.json`,
+    JSON.stringify(contractAddresses)
+  )
 }
 
 deployFunction.tags = ["all", "frontend"]

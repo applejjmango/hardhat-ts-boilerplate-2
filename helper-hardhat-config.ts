@@ -83,6 +83,5 @@ export const networkConfig: NetworkConfigMap = {
 export const developmentChains: string[] = ["hardhat", "localhost"]
 export const VERIFICATION_BLOCK_CONFIRMATIONS = 2
 
-export const frontEndContractsFile =
-  "../nextjs-ts-web3-practice/public/contractAddress/contractAddress.json"
-export const frontEndAbiLocation = "../nextjs-ts-web3-practice/public/contractAbi/contractAbi.json"
+export const frontEndContractsLocation = "../nextjs-ts-web3-practice/public/contractAddress/"
+export const frontEndAbiLocation = "../nextjs-ts-web3-practice/public/contractAbi/"
