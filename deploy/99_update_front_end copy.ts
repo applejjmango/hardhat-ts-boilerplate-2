@@ -28,7 +28,7 @@ async function updateContractAddresses() {
   const NFTMarketPlace = await ethers.getContract("NFTMarket")
   console.log("NFTMarket address: ", NFTMarketPlace.address)
 
-  const chainId = network.config.chainId
+  const chainId: number | undefined = network.config.chainId
   console.log("chainId ", chainId)
   if (!chainId) return
 
